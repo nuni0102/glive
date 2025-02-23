@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vòng Quay Glive</title>
+    <style>
+        body {
+            text-align: center;
+            background: url('background.jpg') no-repeat center center fixed;
+            background-size: cover;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            position: relative;
+            display: inline-block;
+            margin-top: 50px;
+        }
+        .wheel-container {
+            position: relative;
+            width: 400px;
+            height: 400px;
+        }
+        .wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 5px solid red;
+            position: relative;
+            transition: transform 4s ease-out;
+        }
+        .arrow {
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-top: 40px solid blue;
+            position: absolute;
+            top: -45px;
+            left: 50%;
+            transform: translateX(-13%);
+          
+            z-index: 10;
+        }
+        .button {
+            background-color: red;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+        .input-field {
+            width: 180px;
+            height: 28px;
+            font-size: 14px;
+            padding: 5px;
+            margin: 5px;
+        }
+        #result {
+            font-size: 22px;
+            font-weight: bold;
+            margin-top: 10px;
+            color: green;
+        }
+        .highlight {
+            animation: blink 0.5s step-start infinite alternate;
+        }
+        @keyframes blink {
+            50% {
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <input type="text" id="giftcode" class="input-field" placeholder="Nhập gift code">
+    <input type="text" id="username" class="input-field" placeholder="Nhập tên tài khoản">
+    <button class="button" onclick="confirmEntry()">Xác nhận</button>
+    <br><br>
+    <div class="container">
+        <div class="arrow"></div>
+        <div class="wheel-container">
+            <canvas id="wheelCanvas" class="wheel"></canvas>
+        </div>
+    </div>
+    <br>
+    <button class="button" id="spinButton" onclick="spinWheel()" disabled>Quay thưởng</button>
+    <br><br>
+    <div id="result"></div>
+    <script>
+        let wheelCanvas = document.getElementById("wheelCanvas");
+        let ctx = wheelCanvas.getContext("2d");
+        wheelCanvas.width = 400;
+        wheelCanvas.height = 400;
+        let segments = ["8k - 8888k", "28k", "68k", "188k", "388k", "588k", "888k", "Chúc bạn\nmay mắn\nlần sau", "IP16 PRM", "Airpods 2"];
+        let colors = ["#FF0000", "#FFFFFF"];
+        let startAngle = 0;
+        let arc = (2 * Math.PI) / segments.length;
+        let giftCodeMapping = {
+            "AAA": "8k - 8888k",
+            "BBB": "28k",
+            "CCC": "68k",
+            "DDD": "188k",
+            "EEE": "388k",
+            "GGG": "588k",
+            "HHH": "888k",
+            "CMM": "Chúc bạn\nmay mắn\nlần sau",
+            "IP": "IP16 PRM",
+            "AIR": "Airpods 2"
+        };
+        let enteredGiftCode = "";
+
+        function drawWheel() {
+            ctx.clearRect(0, 0, wheelCanvas.width, wheelCanvas.height);
+            for (let i = 0; i < segments.length; i++) {
+                let angle = startAngle + i * arc;
+                ctx.fillStyle = colors[i % 2];
+                ctx.beginPath();
+                ctx.moveTo(200, 200);
+                ctx.arc(200, 200, 200, angle, angle + arc, false);
+                ctx.lineTo(200, 200);
+                ctx.fill();
+                ctx.fillStyle = "black";
+                ctx.font = "bold 16px Arial";
+                ctx.textAlign = "center";
+                let lines = segments[i].split("\n");
+                lines.forEach((line, index) => {
+                    ctx.fillText(line, 200 + Math.cos(angle + arc / 2) * 140, 200 + Math.sin(angle + arc / 2) * 140 + (index * 18));
+                });
+            }
+        }
+        
+        function confirmEntry() {
+            enteredGiftCode = document.getElementById("giftcode").value;
+            if (!(enteredGiftCode in giftCodeMapping)) {
+                alert("Gift code không hợp lệ! Vui lòng nhập lại.");
+                return;
+            }
+            alert("Chúc mừng! Bạn đã nhận được 1 lượt quay!");
+            document.getElementById("spinButton").disabled = false;
+        }
+        
+        function spinWheel() {
+            if (!(enteredGiftCode in giftCodeMapping)) {
+                alert("Bạn chưa nhập gift code hợp lệ!");
+                return;
+            }
+            let prizeIndex = segments.indexOf(giftCodeMapping[enteredGiftCode]);
+            let rotation = 360 * 5 - (prizeIndex * (360 / segments.length)) - 90;
+            wheelCanvas.style.transform = `rotate(${rotation}deg)`;
+            setTimeout(() => {
+                document.getElementById("result").innerText = `🎉 Chúc mừng! Bạn đã trúng ${segments[prizeIndex]}`;
+            }, 4000);
+        }
+        
+        drawWheel();
+    </script>
+</body>
+</html>
